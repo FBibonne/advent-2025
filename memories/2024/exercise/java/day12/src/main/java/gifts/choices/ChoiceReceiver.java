@@ -1,4 +1,6 @@
-package gifts;
+package gifts.choices;
+
+import gifts.Toy;
 
 public interface ChoiceReceiver {
     void setFirstChoice(Toy choice);

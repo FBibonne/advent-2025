@@ -1,4 +1,6 @@
-package gifts;
+package gifts.choices;
+
+import gifts.Toy;
 
 import java.util.Optional;
 

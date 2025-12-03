@@ -1,12 +1,13 @@
-package gifts;
+package gifts.childs;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ChildRepositoryImpl implements ChildRepository {
-    final List<Child> childrenRepository;
+record ChildRepositoryImpl(List<Child> childrenRepository) implements ChildRepository {
 
-    public ChildRepositoryImpl() {
+    ChildRepositoryImpl(){
+        this(new ArrayList<>());
     }
 
     @Override
