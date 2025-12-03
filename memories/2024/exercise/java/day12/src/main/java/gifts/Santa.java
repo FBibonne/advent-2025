@@ -1,40 +1,36 @@
 package gifts;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class Santa {
 
-    private final List<Child> childrenRepository;
-    public Santa() {
-        this.childrenRepository = new ArrayList<>();
+    private final ChildRepository childRepository;
+
+    public Santa(ChildRepository childRepository) {
+        this.childRepository = childRepository;
     }
 
     public Toy chooseToyForChild(String childName){
-        Optional<Child> found = Optional.empty();
-        for (int i = 0; i < childrenRepository.size(); i++) {
-            Child currentChild = childrenRepository.get(i);
-            if (currentChild.getName().equals(childName)) {
-                found = Optional.of(currentChild);
-            }
-        }
-        Child child = found.orElseThrow(NoSuchElementException::new);
+        Optional<Child> found = childRepository.findByName(childName);
 
-        if("naughty".equals(child.getBehavior()))
-            return child.getWishlist().get(child.getWishlist().size() - 1);
+        return found.flatMap(child -> choicer(child).apply(child.choiceProvider()))
+                .orElseThrow(NoSuchElementException::new);
+        //TODO should return null when Behavior is not naughty, neither nice neither very nice
+    }
 
-        if("nice".equals(child.getBehavior()))
-            return child.getWishlist().get(1);
-
-        if("very nice".equals(child.getBehavior()))
-            return child.getWishlist().get(0);
-
-        return null;
+    private Function<ChoiceProvider, Optional<Toy>> choicer(Child child) {
+        return switch (child.behavior()){
+            case Behavior b when b.isNaughty() -> ChoiceProvider::getThirdChoice;
+            case Behavior b when b.isNice() -> ChoiceProvider::getSecondChoice;
+            case Behavior b when b.isVeryNice() -> ChoiceProvider::getFirstChoice;
+            default -> unused -> Optional.empty();
+        };
     }
 
     public void addChild(Child child) {
-        childrenRepository.add(child);
+        childRepository.addChild(child);
     }
 }
