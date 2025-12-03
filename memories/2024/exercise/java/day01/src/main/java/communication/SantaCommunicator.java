@@ -2,24 +2,30 @@ package communication;
 
 public class SantaCommunicator {
     private final int numberOfDaysToRest;
+    private final Logger logger;
 
-    public SantaCommunicator(int numberOfDaysToRest) {
+    public SantaCommunicator(int numberOfDaysToRest, Logger logger) {
         this.numberOfDaysToRest = numberOfDaysToRest;
+        this.logger = logger;
     }
 
-    public String composeMessage(String reindeerName, String currentLocation, int numbersOfDaysForComingBack, int numberOfDaysBeforeChristmas) {
-        var daysBeforeReturn = daysBeforeReturn(numbersOfDaysForComingBack, numberOfDaysBeforeChristmas);
+    public String composeMessage(Reindeer reindeer, int numberOfDaysBeforeChristmas) {
+        var daysBeforeReturn = daysBeforeReturn(reindeer.numbersOfDaysForComingBack(), numberOfDaysBeforeChristmas);
 
-        return "Dear " + reindeerName + ", please return from " + currentLocation +
+        return "Dear " + reindeer.reindeerName() + ", please return from " + reindeer.currentLocation() +
                 " in " + daysBeforeReturn + " day(s) to be ready and rest before Christmas.";
     }
 
-    public boolean isOverdue(String reindeerName, String currentLocation, int numbersOfDaysForComingBack, int numberOfDaysBeforeChristmas, Logger logger) {
-        if (daysBeforeReturn(numbersOfDaysForComingBack, numberOfDaysBeforeChristmas) <= 0) {
-            logger.log("Overdue for " + reindeerName + " located " + currentLocation + ".");
-            return true;
+    public boolean isOverdue(Reindeer reindeer, int numberOfDaysBeforeChristmas) {
+        boolean overdue = isOverdue(reindeer.numbersOfDaysForComingBack(), numberOfDaysBeforeChristmas);
+        if (overdue) {
+            logger.log("Overdue for "+reindeer.reindeerName()+" located "+reindeer.currentLocation()+".");
         }
-        return false;
+        return overdue;
+    }
+
+    private boolean isOverdue(int numbersOfDaysForComingBack, int numberOfDaysBeforeChristmas) {
+        return daysBeforeReturn(numbersOfDaysForComingBack, numberOfDaysBeforeChristmas) <= 0;
     }
 
     private int daysBeforeReturn(int numbersOfDaysForComingBack, int numberOfDaysBeforeChristmas) {
