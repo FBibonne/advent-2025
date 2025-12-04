@@ -1,40 +1,33 @@
 package gifts;
 
-import java.util.ArrayList;
-import java.util.List;
+import gifts.childs.Child;
+import gifts.childs.ChildrenRepository;
+
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-public class Santa {
+record Santa(ChildrenRepository childrenRepository){
 
-    private final List<Child> childrenRepository;
-    public Santa() {
-        this.childrenRepository = new ArrayList<>();
+    public Toy chooseToyForChild(String childName) {
+        Optional<Child> foundChild = childrenRepository.findByName(childName);
+
+        if (foundChild.isEmpty()){
+            throw new NoSuchElementException();
+        }
+        Child child = foundChild.get();
+        return toySelectorBasedOnBehavior((child.behavior())).selectToy(child.wishlist()).orElseThrow();
     }
 
-    public Toy chooseToyForChild(String childName){
-        Optional<Child> found = Optional.empty();
-        for (int i = 0; i < childrenRepository.size(); i++) {
-            Child currentChild = childrenRepository.get(i);
-            if (currentChild.getName().equals(childName)) {
-                found = Optional.of(currentChild);
-            }
-        }
-        Child child = found.orElseThrow(NoSuchElementException::new);
-
-        if("naughty".equals(child.getBehavior()))
-            return child.getWishlist().get(child.getWishlist().size() - 1);
-
-        if("nice".equals(child.getBehavior()))
-            return child.getWishlist().get(1);
-
-        if("very nice".equals(child.getBehavior()))
-            return child.getWishlist().get(0);
-
-        return null;
+    private ToySelector toySelectorBasedOnBehavior(Behavior behavior) {
+        return switch (behavior) {
+            case Behavior b when b.isNaughty() -> Wishlist::getThirdChoice;
+            case Behavior b when b.isNice() -> Wishlist::getSecondChoice;
+            case Behavior b when b.isVeryNice() -> Wishlist::getFirstChoice;
+            default -> throw new IllegalStateException("unexpected behavior: " + behavior);
+        };
     }
 
     public void addChild(Child child) {
-        childrenRepository.add(child);
+        childrenRepository.addChild(child);
     }
 }
