@@ -1,43 +1,15 @@
 package gifts;
 
-public interface Behavior {
-    static Behavior naugthyInstance() {
-        return new Behavior() {
-            @Override
-            public boolean isNaughty() {
-                return true;
-            }
-        };
+public enum Behavior {
+    NAUGHTY, NICE, VERY_NICE;
+
+    public boolean isNaughty(){
+        return NAUGHTY == this;
     }
-
-    static Behavior niceInstance() {
-        return new Behavior() {
-            @Override
-            public boolean isNice() {
-                return true;
-            }
-        };
-
-
+    public boolean isNice(){
+        return NICE == this;
     }
-
-    static Behavior veryNiceInstance() {
-        return new Behavior() {
-            @Override
-            public boolean isVeryNice() {
-                return true;
-            }
-        };
-    }
-
-
-    default boolean isNaughty(){
-        return false;
-    }
-    default boolean isNice(){
-        return false;
-    }
-    default boolean isVeryNice(){
-        return false;
+    public boolean isVeryNice(){
+        return VERY_NICE == this;
     }
 }
