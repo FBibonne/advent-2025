@@ -14,16 +14,16 @@ record SantaImpl(ChildRepository childRepository) implements Santa {
     public Toy chooseToyForChild(String childName) {
         Optional<Child> found = childRepository.findByName(childName);
 
-        return found.flatMap(child -> choicer(child).apply(child.choiceProvider()))
+        return found.flatMap(child -> choicer(child.behavior()).apply(child.choiceProvider()))
                 .orElseThrow(NoSuchElementException::new);
     }
 
-    private Function<ChoiceProvider, Optional<Toy>> choicer(Child child) {
-        return switch (child.behavior()) {
+    private Function<ChoiceProvider, Optional<Toy>> choicer(Behavior behavior) {
+        return switch (behavior) {
             case Behavior b when b.isNaughty() -> ChoiceProvider::getThirdChoice;
             case Behavior b when b.isNice() -> ChoiceProvider::getSecondChoice;
             case Behavior b when b.isVeryNice() -> ChoiceProvider::getFirstChoice;
-            default -> throw new IllegalStateException("unexpected behavior: " + child.behavior());
+            default -> throw new IllegalStateException("unexpected behavior: " + behavior);
         };
     }
 
