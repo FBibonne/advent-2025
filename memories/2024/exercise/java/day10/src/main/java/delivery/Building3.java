@@ -10,11 +10,13 @@ public class Building3 {
 
         for (int i = 0; i < instructions.length(); i++) {
             char c = instructions.charAt(i);
-            
-            if (hasElf) {
-                val.add(c == ')' ? 3 : -2);
-            } else {
-                val.add(c == '(' ? 1 : -1);
+
+            if (c==')' || c=='(') {
+                if (hasElf) {
+                    val.add(c == ')' ? 3 : -2);
+                } else {
+                    val.add(c == '(' ? 1 : -1);
+                }
             }
         }
 
