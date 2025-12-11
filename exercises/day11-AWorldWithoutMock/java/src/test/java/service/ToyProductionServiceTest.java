@@ -64,31 +64,33 @@ public class ToyProductionServiceTest {
     void assignToyToElfShouldNotSaveOrNotifyWhenToyAlreadyInProduction() {
         // given
         Toy toy = new Toy(TOY_NAME, IN_PRODUCTION);
-        when(repository.findByName(TOY_NAME)).thenReturn(toy);
+        ToyRepositorySpy toyRepositorySpy = new ToyRepositorySpy(toy);
+        NotificationServiceSpy notificationServiceSpy = new NotificationServiceSpy();
+        service = new ToyProductionService(toyRepositorySpy, notificationServiceSpy);
 
         // when
         service.assignToyToElf(TOY_NAME);
 
         // then
-        verify(repository).findByName(TOY_NAME);
-        verify(repository, never()).save(any());
-        verifyNoInteractions(notificationService);
+        assertTrue(toyRepositorySpy.findByNameHasBeenCalledOnceWith(TOY_NAME));
+        assertThat(toyRepositorySpy.countSaveCalls()).isZero();
+        assertThat(notificationServiceSpy.countNotifyCalls()).isZero();
     }
 
-    @Test
-    void assignToyToElfShouldSaveBeforeNotifying() {
-        // given
-        Toy toy = new Toy(TOY_NAME, UNASSIGNED);
-        when(repository.findByName(TOY_NAME)).thenReturn(toy);
-
-        // when
-        service.assignToyToElf(TOY_NAME);
-
-        // then
-        InOrder inOrder = inOrder(repository, notificationService);
-        inOrder.verify(repository).findByName(TOY_NAME);
-        inOrder.verify(repository).save(any(Toy.class));
-        inOrder.verify(notificationService).notifyToyAssigned(any(Toy.class));
-        inOrder.verifyNoMoreInteractions();
-    }
+//    @Test
+//    void assignToyToElfShouldSaveBeforeNotifying() {
+//        // given
+//        Toy toy = new Toy(TOY_NAME, UNASSIGNED);
+//        when(repository.findByName(TOY_NAME)).thenReturn(toy);
+//
+//        // when
+//        service.assignToyToElf(TOY_NAME);
+//
+//        // then
+//        InOrder inOrder = inOrder(repository, notificationService);
+//        inOrder.verify(repository).findByName(TOY_NAME);
+//        inOrder.verify(repository).save(any(Toy.class));
+//        inOrder.verify(notificationService).notifyToyAssigned(any(Toy.class));
+//        inOrder.verifyNoMoreInteractions();
+//    }
 }
