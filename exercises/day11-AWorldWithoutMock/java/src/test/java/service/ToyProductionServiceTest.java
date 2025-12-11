@@ -2,9 +2,12 @@ package service;
 
 import domain.Toy;
 import domain.ToyRepository;
+import doubles.Calls;
 import doubles.NotificationServiceSpy;
 import doubles.ToyRepositorySpy;
 import org.junit.jupiter.api.Test;
+
+import java.util.Iterator;
 
 import static domain.Toy.State.IN_PRODUCTION;
 import static domain.Toy.State.UNASSIGNED;
@@ -27,9 +30,10 @@ public class ToyProductionServiceTest {
     @Test
     void assignToyToElfShouldSaveToyInProductionAndNotify() {
         // given
+        Calls calls = new Calls();
         Toy toy = new Toy(TOY_NAME, UNASSIGNED);
-        ToyRepositorySpy toyRepositorySpy = new ToyRepositorySpy(toy);
-        NotificationServiceSpy notificationServiceSpy = new NotificationServiceSpy();
+        ToyRepositorySpy toyRepositorySpy = new ToyRepositorySpy(toy, calls);
+        NotificationServiceSpy notificationServiceSpy = new NotificationServiceSpy(calls);
         service = new ToyProductionService(toyRepositorySpy, notificationServiceSpy);
 
         // when
@@ -44,8 +48,9 @@ public class ToyProductionServiceTest {
     @Test
     void assignToyToElfShouldNotSaveOrNotifyWhenToyNotFound() {
         // given
-        ToyRepositorySpy toyRepositorySpy = new ToyRepositorySpy(null);
-        NotificationServiceSpy notificationServiceSpy = new NotificationServiceSpy();
+        Calls calls = new Calls();
+        ToyRepositorySpy toyRepositorySpy = new ToyRepositorySpy(null, calls);
+        NotificationServiceSpy notificationServiceSpy = new NotificationServiceSpy(calls);
         service = new ToyProductionService(toyRepositorySpy, notificationServiceSpy);
 
         // when
@@ -63,9 +68,10 @@ public class ToyProductionServiceTest {
     @Test
     void assignToyToElfShouldNotSaveOrNotifyWhenToyAlreadyInProduction() {
         // given
+        Calls calls = new Calls();
         Toy toy = new Toy(TOY_NAME, IN_PRODUCTION);
-        ToyRepositorySpy toyRepositorySpy = new ToyRepositorySpy(toy);
-        NotificationServiceSpy notificationServiceSpy = new NotificationServiceSpy();
+        ToyRepositorySpy toyRepositorySpy = new ToyRepositorySpy(toy, calls);
+        NotificationServiceSpy notificationServiceSpy = new NotificationServiceSpy(calls);
         service = new ToyProductionService(toyRepositorySpy, notificationServiceSpy);
 
         // when
@@ -77,20 +83,27 @@ public class ToyProductionServiceTest {
         assertThat(notificationServiceSpy.countNotifyCalls()).isZero();
     }
 
-//    @Test
-//    void assignToyToElfShouldSaveBeforeNotifying() {
-//        // given
-//        Toy toy = new Toy(TOY_NAME, UNASSIGNED);
-//        when(repository.findByName(TOY_NAME)).thenReturn(toy);
-//
-//        // when
-//        service.assignToyToElf(TOY_NAME);
-//
-//        // then
-//        InOrder inOrder = inOrder(repository, notificationService);
-//        inOrder.verify(repository).findByName(TOY_NAME);
-//        inOrder.verify(repository).save(any(Toy.class));
-//        inOrder.verify(notificationService).notifyToyAssigned(any(Toy.class));
-//        inOrder.verifyNoMoreInteractions();
-//    }
+    @Test
+    void assignToyToElfShouldSaveBeforeNotifying() {
+        // given
+        Calls calls = new Calls();
+        Toy toy = new Toy(TOY_NAME, UNASSIGNED);
+        ToyRepositorySpy toyRepositorySpy = new ToyRepositorySpy(toy, calls);
+        NotificationServiceSpy notificationServiceSpy = new NotificationServiceSpy(calls);
+        service = new ToyProductionService(toyRepositorySpy, notificationServiceSpy);
+
+        // when
+        service.assignToyToElf(TOY_NAME);
+
+        // then
+        Iterator<Calls.Call> callsIterator = calls.iterator();
+        //inOrder.verify(repository).findByName(TOY_NAME);
+        assertThat(callsIterator.next()).isEqualTo(new Calls.Call(ToyRepository.class, "findByName", TOY_NAME));
+        //inOrder.verify(repository).save(any(Toy.class));
+        assertThat(callsIterator.next()).matches(call -> call.fit(ToyRepository.class, "save"));
+        //inOrder.verify(notificationService).notifyToyAssigned(any(Toy.class));
+        assertThat(callsIterator.next()).matches(call -> call.fit(NotificationService.class, "notifyToyAssigned"));
+        //inOrder.verifyNoMoreInteractions();
+        assertThat(callsIterator.hasNext()).isFalse();
+    }
 }

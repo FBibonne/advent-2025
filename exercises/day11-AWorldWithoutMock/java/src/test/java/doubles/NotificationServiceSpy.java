@@ -7,6 +7,11 @@ public class NotificationServiceSpy implements NotificationService {
 
     private Toy notifyToyAssigned=null;
     private int countNotifyCalls=0;
+    private final Calls calls;
+
+    public NotificationServiceSpy(Calls calls) {
+        this.calls = calls;
+    }
 
     @Override
     public void notifyToyAssigned(Toy toy) {
@@ -14,6 +19,7 @@ public class NotificationServiceSpy implements NotificationService {
             throw new RuntimeException("Toy already assigned : "+notifyToyAssigned);
         }
         countNotifyCalls++;
+        calls.add(NotificationService.class, "notifyToyAssigned", toy);
         this.notifyToyAssigned = toy;
     }
 
