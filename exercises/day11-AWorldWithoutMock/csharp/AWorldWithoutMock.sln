@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AWorldWithoutMocksBefore", "AWorldWithoutMock\AWorldWithoutMocksBefore.csproj", "{F5DDABFA-FF77-4A96-AE38-E19B7276E7A8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AWorldWithoutMocksBefore.Tests", "AWorldWithoutMock.Tests\AWorldWithoutMocksBefore.Tests.csproj", "{D1E5C6F2-6B4E-4E30-AFB4-3A44FB81627C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F5DDABFA-FF77-4A96-AE38-E19B7276E7A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5DDABFA-FF77-4A96-AE38-E19B7276E7A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5DDABFA-FF77-4A96-AE38-E19B7276E7A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5DDABFA-FF77-4A96-AE38-E19B7276E7A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1E5C6F2-6B4E-4E30-AFB4-3A44FB81627C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1E5C6F2-6B4E-4E30-AFB4-3A44FB81627C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1E5C6F2-6B4E-4E30-AFB4-3A44FB81627C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1E5C6F2-6B4E-4E30-AFB4-3A44FB81627C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
