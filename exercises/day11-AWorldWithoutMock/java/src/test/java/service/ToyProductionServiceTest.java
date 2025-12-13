@@ -2,94 +2,108 @@ package service;
 
 import domain.Toy;
 import domain.ToyRepository;
+import doubles.Calls;
+import doubles.NotificationServiceSpy;
+import doubles.ToyRepositorySpy;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.InOrder;
-import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Iterator;
 
 import static domain.Toy.State.IN_PRODUCTION;
 import static domain.Toy.State.UNASSIGNED;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(MockitoExtension.class)
-class ToyProductionServiceTest {
+public class ToyProductionServiceTest {
 
-    private static final String TOY_NAME = "Train";
+    public static final String TOY_NAME = "Train";
 
-    @Mock
+//    @Mock
     ToyRepository repository;
 
-    @Mock
+//    @Mock
     NotificationService notificationService;
 
-    @InjectMocks
+//    @InjectMocks
     ToyProductionService service;
 
     @Test
     void assignToyToElfShouldSaveToyInProductionAndNotify() {
         // given
+        Calls calls = new Calls();
         Toy toy = new Toy(TOY_NAME, UNASSIGNED);
-        when(repository.findByName(TOY_NAME)).thenReturn(toy);
+        ToyRepositorySpy toyRepositorySpy = new ToyRepositorySpy(toy, calls);
+        NotificationServiceSpy notificationServiceSpy = new NotificationServiceSpy(calls);
+        service = new ToyProductionService(toyRepositorySpy, notificationServiceSpy);
 
         // when
         service.assignToyToElf(TOY_NAME);
 
         // then
-        ArgumentCaptor<Toy> toyCaptor = ArgumentCaptor.forClass(Toy.class);
-        verify(repository).save(toyCaptor.capture());
-        Toy savedToy = toyCaptor.getValue();
+        Toy savedToy = toyRepositorySpy.savedToy();
         assertThat(savedToy.getState()).isEqualTo(IN_PRODUCTION);
-
-        verify(notificationService).notifyToyAssigned(savedToy);
+        assertThat(notificationServiceSpy.notifyToyAssigned()).isEqualTo(savedToy);
     }
 
     @Test
     void assignToyToElfShouldNotSaveOrNotifyWhenToyNotFound() {
         // given
-        when(repository.findByName(TOY_NAME)).thenReturn(null);
+        Calls calls = new Calls();
+        ToyRepositorySpy toyRepositorySpy = new ToyRepositorySpy(null, calls);
+        NotificationServiceSpy notificationServiceSpy = new NotificationServiceSpy(calls);
+        service = new ToyProductionService(toyRepositorySpy, notificationServiceSpy);
 
         // when
         service.assignToyToElf(TOY_NAME);
 
         // then
-        verify(repository).findByName(TOY_NAME);
-        verify(repository, never()).save(any());
-        verifyNoInteractions(notificationService);
+        //verify(repository).findByName(TOY_NAME);
+        assertTrue(toyRepositorySpy.findByNameHasBeenCalledOnceWith(TOY_NAME));
+        //verify(repository, never()).save(any());
+        assertThat(toyRepositorySpy.countSaveCalls()).isZero();
+        //verifyNoInteractions(notificationService);
+        assertThat(notificationServiceSpy.countNotifyCalls()).isZero();
     }
 
     @Test
     void assignToyToElfShouldNotSaveOrNotifyWhenToyAlreadyInProduction() {
         // given
+        Calls calls = new Calls();
         Toy toy = new Toy(TOY_NAME, IN_PRODUCTION);
-        when(repository.findByName(TOY_NAME)).thenReturn(toy);
+        ToyRepositorySpy toyRepositorySpy = new ToyRepositorySpy(toy, calls);
+        NotificationServiceSpy notificationServiceSpy = new NotificationServiceSpy(calls);
+        service = new ToyProductionService(toyRepositorySpy, notificationServiceSpy);
 
         // when
         service.assignToyToElf(TOY_NAME);
 
         // then
-        verify(repository).findByName(TOY_NAME);
-        verify(repository, never()).save(any());
-        verifyNoInteractions(notificationService);
+        assertTrue(toyRepositorySpy.findByNameHasBeenCalledOnceWith(TOY_NAME));
+        assertThat(toyRepositorySpy.countSaveCalls()).isZero();
+        assertThat(notificationServiceSpy.countNotifyCalls()).isZero();
     }
 
     @Test
     void assignToyToElfShouldSaveBeforeNotifying() {
         // given
+        Calls calls = new Calls();
         Toy toy = new Toy(TOY_NAME, UNASSIGNED);
-        when(repository.findByName(TOY_NAME)).thenReturn(toy);
+        ToyRepositorySpy toyRepositorySpy = new ToyRepositorySpy(toy, calls);
+        NotificationServiceSpy notificationServiceSpy = new NotificationServiceSpy(calls);
+        service = new ToyProductionService(toyRepositorySpy, notificationServiceSpy);
 
         // when
         service.assignToyToElf(TOY_NAME);
 
         // then
-        InOrder inOrder = inOrder(repository, notificationService);
-        inOrder.verify(repository).findByName(TOY_NAME);
-        inOrder.verify(repository).save(any(Toy.class));
-        inOrder.verify(notificationService).notifyToyAssigned(any(Toy.class));
-        inOrder.verifyNoMoreInteractions();
+        Iterator<Calls.Call> callsIterator = calls.iterator();
+        //inOrder.verify(repository).findByName(TOY_NAME);
+        assertThat(callsIterator.next()).isEqualTo(new Calls.Call(ToyRepository.class, "findByName", TOY_NAME));
+        //inOrder.verify(repository).save(any(Toy.class));
+        assertThat(callsIterator.next()).matches(call -> call.fit(ToyRepository.class, "save"));
+        //inOrder.verify(notificationService).notifyToyAssigned(any(Toy.class));
+        assertThat(callsIterator.next()).matches(call -> call.fit(NotificationService.class, "notifyToyAssigned"));
+        //inOrder.verifyNoMoreInteractions();
+        assertThat(callsIterator.hasNext()).isFalse();
     }
 }
