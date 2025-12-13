@@ -21,7 +21,11 @@ Chaque clic de souris entraîne une diminution de ta paie mensuelle...
 ## Défi — Utiliser uniquement ton clavier dans l'IDE
 
 Aujourd’hui sera probablement l’un des jours les plus difficiles de l’aventure.  
-Non pas parce que le code est compliqué, mais parce que la contrainte risque d’être très dure à tenir.
+Non pas parce que le code est compliqué, mais parce que les contraintes risquent d’être très dure à tenir.
+
+1) La contrainte initiale : La méthode getTripsByUser doit être couverte à 100% avant le refactoring.
+
+2) Essayez d'utiliser seulement le clavier tout au long de l'exercice.
 
 Quelques pistes pour t’aider :
 

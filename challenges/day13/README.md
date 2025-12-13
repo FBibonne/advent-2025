@@ -20,6 +20,10 @@ Any mouse click results in a decrease in our monthly paycheck...
 
 Today is likely to be the most challenging day of the adventure. Not because the code is complicated but because the constraints might be impossible to overcome.
 
+1) The initial constraint: The main method getTripsByUser needs to be covered by tests at 100% before refactoring.
+
+2) Try to use the keyboard only in the whole exercise.
+
 Some help:
 
 - Use AI on chat mode on the side to help you find the right shortcut for your IDE. (oustide of the IDE, mouse is allowed)
