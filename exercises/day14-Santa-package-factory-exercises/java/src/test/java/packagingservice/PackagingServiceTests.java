@@ -2,119 +2,66 @@ package packagingservice;
 
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static packagingservice.GiftSize.SMALL;
+import static packagingservice.PackageType.BOX_SMALL;
 
 public class PackagingServiceTests {
 
+    public static final GiftBuilder DEFAULT_GIFT_BUILDER = GiftBuilder.builder()
+            .name("DefaultGift")
+            .recommendedMinAge(0);
+    private static final ChildBuilder DEFAULT_CHILD_BUILDER = ChildBuilder.builder()
+            .name("DefaultChild")
+            .age(8);
     private final PackagingService service = new PackagingService();
+
 
     @Test
     public void shouldUseSmallBoxForSmallNonFragileGift() {
-        Gift gift = new Gift(
-            "Action Figure",
-            GiftSize.SMALL,
-            false,
-            5
-        );
 
-        Child child = new Child(
-            "Tommy",
-            8,
-            ChildGender.BOY,
-            true,
-            gift
-        );
+        //given
+        Gift giftNonFragileWithSmallSize = DEFAULT_GIFT_BUILDER.fragile(false)
+                .size(SMALL)
+                .build();
+        Child child =  DEFAULT_CHILD_BUILDER.build();
 
-        PackageType result = service.determinePackageType(gift, child);
-
-        assertEquals(PackageType.BOX_SMALL, result);
+        assertThat(service.determinePackageType(giftNonFragileWithSmallSize, child)).isEqualTo(BOX_SMALL);
     }
 
     @Test
     public void shouldUseSpecialContainerForExtraLargeGift() {
-        Gift gift = new Gift(
-            "Bicycle",
-            GiftSize.EXTRA_LARGE,
-            false,
-            8
-        );
+        Gift extraLargeGift = DEFAULT_GIFT_BUILDER.size(GiftSize.EXTRA_LARGE).build();
+        Child child =  DEFAULT_CHILD_BUILDER.build();
 
-        Child child = new Child(
-            "Sarah",
-            10,
-            ChildGender.GIRL,
-            true,
-            gift
-        );
-
-        PackageType result = service.determinePackageType(gift, child);
-
-        assertEquals(PackageType.SPECIAL_CONTAINER, result);
+        assertThat(service.determinePackageType(extraLargeGift, child)).isEqualTo(PackageType.SPECIAL_CONTAINER);
     }
 
     @Test
     public void shouldUseGiftBagForYoungChildren() {
-        Gift gift = new Gift(
-            "Teddy Bear",
-            GiftSize.MEDIUM,
-            false,
-            1
-        );
+        //given
+        Gift defaultGift = DEFAULT_GIFT_BUILDER.build();
+        Child youngChild = DEFAULT_CHILD_BUILDER.age(3).build();
 
-        Child child = new Child(
-            "Emma",
-            3,
-            ChildGender.GIRL,
-            true,
-            gift
-        );
-
-        PackageType result = service.determinePackageType(gift, child);
-
-        assertEquals(PackageType.GIFT_BAG, result);
+        assertThat(service.determinePackageType(defaultGift, youngChild)).isEqualTo(PackageType.GIFT_BAG);
     }
 
     @Test
     public void shouldNotPackageGiftForNaughtyChild() {
-        Gift gift = new Gift(
-            "Video Game Console",
-            GiftSize.MEDIUM,
-            false,
-            6
-        );
+        //Given
+        Gift defaultGift = DEFAULT_GIFT_BUILDER.build();
+        Child naughtyChild = DEFAULT_CHILD_BUILDER.hasBeenNice(false).build();
 
-        Child child = new Child(
-            "Bobby",
-            7,
-            ChildGender.BOY,
-            false,
-            gift
-        );
-
-        boolean result = service.canPackageGift(gift, child);
-
-        assertFalse(result);
+        assertFalse(service.canPackageGift(defaultGift, naughtyChild));
     }
 
     @Test
     public void shouldNotPackageGiftForChildTooYoung() {
-        Gift gift = new Gift(
-            "Complex Building Set",
-            GiftSize.LARGE,
-            false,
-            8
-        );
+        Gift defaultGift = DEFAULT_GIFT_BUILDER.build();
 
-        Child child = new Child(
-            "Lily",
-            4,
-            ChildGender.GIRL,
-            true,
-            gift
-        );
+        Child youngChild = DEFAULT_CHILD_BUILDER.age(4).build();
 
-        boolean result = service.canPackageGift(gift, child);
-
-        assertFalse(result);
+        assertFalse(service.canPackageGift(defaultGift, youngChild));
     }
 }
